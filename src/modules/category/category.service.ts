@@ -33,7 +33,6 @@ export class CategoryService {
         slug += `-${randomId()}`
     }
     await this.categoryRepository.insert({
-      description , 
       slug  ,
       title , 
       parentId : parentCat ? parentId : null
@@ -78,7 +77,6 @@ export class CategoryService {
     const category = await this.categoryRepository.findOneBy({id})
     if(!category) throw new NotFoundException(NotFoundMessege.NotFoundCategory)
     if(title) category.title = title
-    if(description) category.description = description
 
     await this.categoryRepository.save(category)
 
@@ -103,6 +101,16 @@ export class CategoryService {
   async checkExistingCategoryById(id: number){
     const category = await this.categoryRepository.findOneBy({id})
     if(!category) throw new NotFoundException(NotFoundMessege.NotFoundCategory)
+    return category
+  }
+
+  async findByTitle(title: string) {
+    return await this.categoryRepository.findOneBy({title})
+  }
+
+  async insertByTitle(title: string) {
+    let category = this.categoryRepository.create({title})
+    category = await this.categoryRepository.save(category)
     return category
   }
 }

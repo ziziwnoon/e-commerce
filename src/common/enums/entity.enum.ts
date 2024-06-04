@@ -4,5 +4,6 @@ export enum EntityName{
     Otp="otp",
     Category="category",
     Product="product" ,
+    ProductCategory="product_category" ,
     Image="image"
 }

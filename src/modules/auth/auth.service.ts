@@ -150,7 +150,7 @@ export class AuthService {
         if(!otp) throw new UnauthorizedException(AuthMessege.LogInAgain)
         const now = new Date()
         if(otp.expiresIn < now) throw new UnauthorizedException(AuthMessege.ExpiredOtp)
-        if(otp.code !== code) throw new UnauthorizedException(AuthMessege.TryAgain)
+        if(otp.code !== code) throw new UnauthorizedException(AuthMessege.TryAgain)    
         const accessToken = this.tokenService.generateAccessToken({userId})
         if(otp.method === AuthMethod.Email){
             await this.userRepository.update({id:userId} , {verify_email : true})

@@ -12,5 +12,6 @@ import { ProfileEntity } from '../user/entities/profile.entity';
   imports : [TypeOrmModule.forFeature([UserEntity , OtpEntity , ProfileEntity])] ,
   controllers: [AuthController],
   providers: [AuthService , TokenService , JwtService],
+  exports: [AuthService , TokenService , JwtService ,TypeOrmModule],
 })
 export class AuthModule {}

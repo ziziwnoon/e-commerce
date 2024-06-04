@@ -34,7 +34,7 @@ export class TokenService{
     }
 
     verifyAccessToken(token: string) : AccessPayloadType {
-        try {
+        try {      
             return this.jwtService.verify(token , {
                 secret : process.env.ACCESS_TOKEN_SECRET
             })

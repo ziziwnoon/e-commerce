@@ -22,6 +22,7 @@ export enum NotFoundMessege {
     NotFoundBlog = "بلاگ مورد نظر یافت نشد" ,
     NotFound = "محتوای مورد نظر یافت نشد" ,
     NotFoundUser = "کاربر مورد نظر یافت نشد" ,
+    NotFoundProduct = "محصول مورد نظر یافت نشد" ,
 }
 export enum ValidationMessege {
     InvalidImageFormat = "فرمت تصویر وارد شده باید png یا jpg باشد" ,
