@@ -9,6 +9,8 @@ import { ProductCategoryEntity } from "./product-category.entity"
 export class ProductEntity extends BaseEntity {
     @Column()
     title: string
+    @Column({nullable : true})
+    slug: string
     @Column()
     short_text : string
     @Column()

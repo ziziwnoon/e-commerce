@@ -6,6 +6,8 @@ export class CreateProductDto{
     @Length(3 , 150)
     @IsNotEmpty()
     title: string
+    @ApiPropertyOptional()
+    slug: string
     @ApiProperty()
     @Length(10 , 300)
     @IsNotEmpty()

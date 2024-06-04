@@ -16,6 +16,7 @@ import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { PaginationGenerator, PaginationResolver } from 'src/common/utils/pagination.util';
 import { EntityName } from 'src/common/enums/entity.enum';
 import { Role } from 'src/common/enums/role.enum';
+import { createSlug, randomId } from 'src/common/utils/functions';
 
 @Injectable({scope : Scope.REQUEST})
 export class ProductService {
@@ -31,6 +32,7 @@ export class ProductService {
     const userId = this.request.user.id
     let {title , 
       short_text ,
+      slug ,
       text , 
       images , 
       count , 
@@ -46,6 +48,12 @@ export class ProductService {
       width
      } = createProductDto
 
+    let slugData = slug ?? title
+    slug = createSlug(slugData)
+    const existingSlug = await this.checkExistingProductBySlug(slug)
+    if(existingSlug) {
+        slug += `-${randomId()}`
+    }
     if(!width) width = 0;
     else width = +width;
     if(!weight) weight = 0;
@@ -83,7 +91,7 @@ export class ProductService {
     }
 
     let product = this.productRepository.create({
-        title , short_text , text , count , price ,
+        title , slug , short_text , text , count , price ,
         discount ,
         color , 
         height , 
@@ -116,45 +124,51 @@ export class ProductService {
    
 }
 
-  async findAll(paginationDto: PaginationDto , productFilterDto: ProductFilterDto) {
-    const {limit , page , skip} = PaginationResolver(paginationDto)
-        let {category , search} = productFilterDto
 
-        let where = ''
+async checkExistingProductBySlug(slug: string){
+  const product = await this.productRepository.findOneBy({slug})
+  return product
+}
 
-        if(category){
-            category = category.toLocaleLowerCase()
-            if(where.length > 0) where += ' AND '
-            where += 'category.title = LOWER(:category)'
-        }
-        if(search){
-            if(where.length > 0) where += " AND "
-            search = `%${search}%`
-            where += 'CONCAT(product.title , product.short_text , product.text) ILIKE :search'
-        }
+async findAll(paginationDto: PaginationDto , productFilterDto: ProductFilterDto) {
+  const {limit , page , skip} = PaginationResolver(paginationDto)
+      let {category , search} = productFilterDto
 
-        const [products , count] = await this.productRepository.createQueryBuilder(EntityName.Product)
-        .leftJoin("product.categories" , "categories")
-        .leftJoin("categories.category" , "category")
-        .leftJoin("product.supplier" , "supplier")
-        .leftJoin("supplier.profile" , "profile")
-        .addSelect(["categories.id" , "category.title" , "supplier.id" , "supplier.username" , "profile.nick_name"])
-        .where(where , {category , search})
-        // .loadRelationCountAndMap("blog.likes" , "blog.likes")
-        // .loadRelationCountAndMap("blog.bookmarks" , "blog.bookmarks")
-        // .loadRelationCountAndMap("blog.comments" , "blog.comments" , "comments" , (qb) => 
-        //     qb.where("comments.accepted= :accepted" , {accepted : true})
-        //  )
-        .orderBy("product.id" , "DESC")
-        .skip(skip)
-        .take(limit)
-        .getManyAndCount()
+      let where = ''
 
-        return {
-            pagination: PaginationGenerator(count , page , limit) ,
-            products
-        }
-  }
+      if(category){
+          category = category.toLocaleLowerCase()
+          if(where.length > 0) where += ' AND '
+          where += 'category.title = LOWER(:category)'
+      }
+      if(search){
+          if(where.length > 0) where += " AND "
+          search = `%${search}%`
+          where += 'CONCAT(product.title , product.short_text , product.text) ILIKE :search'
+      }
+
+      const [products , count] = await this.productRepository.createQueryBuilder(EntityName.Product)
+      .leftJoin("product.categories" , "categories")
+      .leftJoin("categories.category" , "category")
+      .leftJoin("product.supplier" , "supplier")
+      .leftJoin("supplier.profile" , "profile")
+      .addSelect(["categories.id" , "category.title" , "supplier.id" , "supplier.username" , "profile.nick_name"])
+      .where(where , {category , search})
+      // .loadRelationCountAndMap("blog.likes" , "blog.likes")
+      // .loadRelationCountAndMap("blog.bookmarks" , "blog.bookmarks")
+      // .loadRelationCountAndMap("blog.comments" , "blog.comments" , "comments" , (qb) => 
+      //     qb.where("comments.accepted= :accepted" , {accepted : true})
+      //  )
+      .orderBy("product.id" , "DESC")
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount()
+
+      return {
+          pagination: PaginationGenerator(count , page , limit) ,
+          products
+      }
+}
 
   async myProducts(){
     const {id} = this.request.user
@@ -261,5 +275,79 @@ async findProductById(id: number){
     return {
         message : PublicMessege.Deleted
     }
+  }
+
+
+  async findOneBySlug(slug: string , paginationDto: PaginationDto){
+    const userId = this.request?.user?.id
+
+    const product = await this.productRepository.createQueryBuilder(EntityName.Product)
+    .leftJoin("product.categories" , "categories")
+    .leftJoin("categories.category" , "category")
+    .leftJoin("product.supplier" , "supplier")
+    .leftJoin("supplier.profile" , "profile")
+    .addSelect(["categories.id" , "category.title" , "supplier.id" , "supplier.username" , "profile.nick_name"])
+    .where({slug})
+    // .loadRelationCountAndMap("blog.likes" , "blog.likes")
+    // .loadRelationCountAndMap("blog.bookmarks" , "blog.bookmarks")
+    .getOne()
+    if(!product) throw new NotFoundException(NotFoundMessege.NotFoundProduct)
+
+    // const comments = await this.blogCommentService.findCommentsOfBlog(blog.id , paginationDto)
+    // let isLiked = false
+    // let isBookmarked = false
+
+    // if(userId && !isNaN(userId) && userId>0){
+    //     isLiked = !!(await this.blogLikeRepository.findOneBy({userId , blogId : blog.id}))
+    //     isBookmarked = !!(await this.blogBookmarkRepository.findOneBy({userId , blogId : blog.id}))
+    // }
+
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.connect()
+    
+    const suggestedProducts = await queryRunner.query(`
+        WITH suggested_products AS (
+            SELECT 
+                product.id ,
+                product.title ,
+                product.slug ,
+                product.short_text ,
+                product.text ,
+                product.image ,
+                json_build_object(
+                    'username', u.username,
+                    'author_name', p.nick_name,
+                    'image', p.profile_image
+                ) AS supplier ,
+                array_agg(DISTINCT cat.title) AS categories,
+            FROM product
+            LEFT JOIN public.user u ON product."supplierId" = u.id
+            LEFT JOIN profile p ON p."userId" = u.id
+            LEFT JOIN product_category bc ON product.id = bc."productId"
+            LEFT JOIN category cat ON bc."categoryId" = cat.id
+            GROUP BY product.id , u.username , p.nick_name , p.profile_image
+            ORDER BY RANDOM()
+            LIMIT 3
+        )
+        SELECT * FROM suggested_products
+    `)
+
+    return {
+        product ,
+        suggestedProducts
+    }
+
+    // (
+    //   SELECT COUNT(*) FROM blog_like
+    //   WHERE blog_like."blogId" = blog.id
+    // ) AS likes ,
+    // (
+    //     SELECT COUNT(*) FROM blog_bookmark
+    //     WHERE blog_bookmark."blogId" = blog.id
+    // ) AS bookmarks ,
+    // (
+    //     SELECT COUNT(*) FROM blog_comment
+    //     WHERE blog_comment."blogId" = blog.id
+    // ) AS comments 
   }
 }
