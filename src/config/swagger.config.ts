@@ -4,7 +4,7 @@ import { SecuritySchemeObject } from "@nestjs/swagger/dist/interfaces/open-api-s
 
 export function swaggerInitConfig(app: INestApplication) : void {
     const document = new DocumentBuilder()
-    .setTitle("Virgool")
+    .setTitle("E-Commerce")
     .setDescription("Backend of An e-commerce Website")
     .setVersion("V0.0.1")
     .addBearerAuth(SwaggerAuthConfig() , "Authorization")
