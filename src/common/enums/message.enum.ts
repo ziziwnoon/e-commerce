@@ -7,6 +7,7 @@ export enum BadRequestMessege {
     AlreadyAccepted = "نظر انتخاب شده قبلا تایید شده است" ,
     AlreadyRejected = "نظر انتخاب شده قبلا رد شده است" ,
     AlreadyExistingTitle = "عنوان وارد شده تکراری میباشد" ,
+    NotInCart = "این محصول در سبد خرید شما نیست"
 }
 export enum AuthMessege {
     NotFoundAccount = "حساب کاربری موردنظر یافت نشد" ,
@@ -44,6 +45,8 @@ export enum PublicMessege {
     Unfollowed = "با موفقیت از لیست دنبال شوندگان برداشته شد" ,
     Blocked = "با موفقیت مسدود شد" ,
     Unblocked = "با موفقیت رفع مسدودیت شد" ,
+    AddedToCart = "محصول با موفقیت به سبد خرید افزوده شد" ,
+    DeletedFromCart = "محصول با موفقیت از سبد خرید حذف شد" ,
 }
 
 export enum ConflictMessege {
@@ -53,3 +56,4 @@ export enum ConflictMessege {
     Username = "نام کاربری وارد شده قبلا استفاده شده است" ,
     
 }
+

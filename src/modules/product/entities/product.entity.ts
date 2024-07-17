@@ -4,6 +4,8 @@ import { CategoryEntity } from "src/modules/category/entities/category.entity"
 import { UserEntity } from "src/modules/user/entities/user.entity"
 import { EntityName } from "src/common/enums/entity.enum"
 import { ProductCategoryEntity } from "./product-category.entity"
+import { CartEntity } from "src/modules/cart/entities/cart.entity"
+import { CartItemEntity } from "src/modules/cart/entities/cart-item.entity"
 
 @Entity(EntityName.Product)
 export class ProductEntity extends BaseEntity {
@@ -43,6 +45,8 @@ export class ProductEntity extends BaseEntity {
     supplier: UserEntity
     @OneToMany(() => ProductCategoryEntity , category => category.product)
     categories: ProductCategoryEntity[]
+    @OneToMany(() => CartItemEntity, cart_item => cart_item.product , {onDelete : "CASCADE"})
+    carts_item: CartItemEntity[]
     @CreateDateColumn()
     created_at: Date
     @UpdateDateColumn()

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UseGuards, Query, ParseIntPipe } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto, ProductFilterDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -23,6 +23,12 @@ export class ProductController {
     return this.productService.create(createProductDto);
   }
 
+  @Get("/by-slug/:slug")
+  findProductBySlug(@Param('slug') slug: string){
+    return this.productService.findOneBySlug(slug)
+  }
+
+
   @Get("/")
   @Pagination()
   @ProductFilter()
@@ -36,6 +42,7 @@ export class ProductController {
   }
 
   @Patch(':id')
+  @ApiConsumes(SwaggerConsumes.Json , SwaggerConsumes.Urlencoded)
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return this.productService.update(+id, updateProductDto);
   }

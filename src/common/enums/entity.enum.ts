@@ -5,5 +5,6 @@ export enum EntityName{
     Category="category",
     Product="product" ,
     ProductCategory="product_category" ,
-    Image="image"
+    Image="image" ,
+    Cart="cart" ,
 }

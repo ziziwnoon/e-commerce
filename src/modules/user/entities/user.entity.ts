@@ -6,6 +6,7 @@ import { EntityName } from "src/common/enums/entity.enum";
 import { OtpEntity } from "./otp.entity";
 import { ProductEntity } from "src/modules/product/entities/product.entity";
 import { ImageEntity } from "src/modules/image/entities/image.entity";
+import { CartEntity } from "src/modules/cart/entities/cart.entity";
 
 @Entity(EntityName.User)
 export class UserEntity extends BaseEntity{
@@ -42,6 +43,8 @@ export class UserEntity extends BaseEntity{
         otp: OtpEntity
         @OneToMany(() => ProductEntity , products => products.supplier)
         products: ProductEntity[]
+        @OneToOne(() => CartEntity, cart => cart.user)
+        cart: CartEntity
         // otpId: number
         // @OneToOne(() => OtpEntity , otp => otp.user)
         // @JoinColumn()

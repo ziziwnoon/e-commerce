@@ -10,6 +10,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CategoryModule } from './modules/category/category.module';
 import { ProductModule } from './modules/product/product.module';
 import { ImageModule } from './modules/image/image.module';
+import { CartModule } from './modules/cart/cart.module';
+import { OrderModule } from './modules/order/order.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -21,7 +23,9 @@ import { ImageModule } from './modules/image/image.module';
   AuthModule,
   CategoryModule,
   ProductModule,
-  ImageModule
+  ImageModule,
+  CartModule,
+  OrderModule
   ],
   controllers: [AppController],
   providers: [AppService],

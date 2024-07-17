@@ -193,7 +193,6 @@ async findProductById(id: number){
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
-    const {id: supplierId} = this.request.user
     const product = await this.findProductById(id)
     let {title , 
       short_text ,
@@ -209,29 +208,47 @@ async findProductById(id: number){
       madein , 
       model , 
       weight , 
-      width
+      width ,
+      slug
      } = updateProductDto
 
+    
     if(!isArray(categoryIds) && typeof categoryIds === "string"){
-      categoryIds = categoryIds.split(",")
+      categoryIds = categoryIds?.split(",") ?? null
     } else if(!isArray(categoryIds)) {
         throw new BadRequestException(BadRequestMessege.InvalidDataFormat)
     }
     if(!isArray(color) && typeof color === "string"){
-      color = color.split(",")
+      color = color?.split(",") ?? null
     } else if(!isArray(color)) {
         throw new BadRequestException(BadRequestMessege.InvalidDataFormat)
     }
     if(!isArray(images) && typeof images === "string"){
-      images = images.split(",")
+      images = images?.split(",") ?? null
     } else if(!isArray(images)) {
         throw new BadRequestException(BadRequestMessege.InvalidDataFormat)
     }
    
     if (!isArray(model) && typeof model === "string"){
-      model = model.split(",")
+      model = model?.split(",") ?? null
     } else if(!isArray(model)) {
         throw new BadRequestException(BadRequestMessege.InvalidDataFormat)
+    }
+
+    let slugData = null
+
+    if(title){
+        slugData = title
+        product.title = title
+    }
+    if(slug) slugData = slug
+
+    if(slugData){
+        product.slug = createSlug(slugData)
+        const existingSlug = await this.checkExistingProductBySlug(slug)
+        if(existingSlug && existingSlug.id !== id) {
+            slug += `-${randomId()}`
+        }
     }
 
      if(title) product.title = title
@@ -278,7 +295,7 @@ async findProductById(id: number){
   }
 
 
-  async findOneBySlug(slug: string , paginationDto: PaginationDto){
+  async findOneBySlug(slug: string){
     const userId = this.request?.user?.id
 
     const product = await this.productRepository.createQueryBuilder(EntityName.Product)
